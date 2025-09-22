@@ -1,0 +1,100 @@
+name: Publish SDK on Release Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+env:
+  NPM_ORGANIZATION: "@test-sdk-123"
+
+jobs:
+  publish-npm:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Extract version from branch name
+        id: extract_version
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          VERSION="${BRANCH#release/v}"
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION"
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Install dependencies
+        run: npm install
+        
+      - name: Update package.json version
+        run: |
+          if [ -f "package.json" ]; then
+            npm version ${{ steps.extract_version.outputs.VERSION }} --no-git-tag-version
+            echo "Updated package.json to version ${{ steps.extract_version.outputs.VERSION }}"
+          else
+            echo "No package.json found, creating one"
+            echo '{"name":"'@test-sdk-123/typescript-sdk'","version":"'${{ steps.extract_version.outputs.VERSION }}'","main":"index.js"}' > package.json
+          fi
+          
+      - name: Build package if necessary
+        run: |
+          if [ -f "tsconfig.json" ]; then
+            npm run build --if-present
+          fi
+          
+      - name: Publish to npm
+        run: |
+          if [ -f "package.json" ]; then
+            npm publish --access public
+          else
+            echo "⚠️ No package.json found, skipping npm publish"
+            echo "This repository needs to have SDK files pushed before publishing will work"
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.extract_version.outputs.VERSION }}
+          release_name: Release v${{ steps.extract_version.outputs.VERSION }}
+          body: |
+            ## 🚀 SDK v${{ steps.extract_version.outputs.VERSION }} Released
+            
+            ### Installation
+            ```bash
+            npm install @test-sdk-123/typescript-sdk@${{ steps.extract_version.outputs.VERSION }}
+            ```
+            
+            ### Changes
+            See PR #${{ github.event.pull_request.number }} for details.
+          draft: false
+          prerelease: false
+          
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.name,
+              body: '✅ **SDK Published Successfully!**\n\n' +
+                    '📦 npm: `@test-sdk-123/typescript-sdk@${{ steps.extract_version.outputs.VERSION }}`\n' +
+                    '🏷️ GitHub Release: [v${{ steps.extract_version.outputs.VERSION }}](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.extract_version.outputs.VERSION }})\n\n' +
+                    'Install with:\n```bash\nnpm install @test-sdk-123/typescript-sdk@${{ steps.extract_version.outputs.VERSION }}\n```'
+            })
