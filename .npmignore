@@ -1,1 +1,19 @@
+# Source files
+src/
+*.ts
+!dist/
+
+# Build and development files
+tsconfig*.json
+.openapi-generator/
+.openapi-generator-ignore
+.gitignore
+
+# Documentation and development files
 README.md
+*.md
+
+# Only include dist directory and package files
+*
+!dist/
+!package.json
