@@ -61,10 +61,6 @@ console.log('Primary Color:', response.colors.primary[0].hex);
 Class | Method | Description
 ------------ | ------------- | -------------
 *EchoApi* | **echo** | Echo test
-*TagApi* | **operationId** | Operation summary
-*TagApi* | **postPathItemWithExamples** | Operation summary with examples
-*UserApi* | **getUserByName** | Get user by user name
-*UserApi* | **updateUser** | Updated user
 
 
 ## Models
@@ -80,20 +76,9 @@ Authentication schemes defined for the API:
 [Example.com Authentication Documentation](http://localhost:4321/docs/authentication)
 
 
-### main_auth
-
-- **Type**: `OAuth`
-- **Flow**: `implicit`
-- **Authorization URL**: `http://example.com/api/oauth/dialog`
-- **Scopes**: 
-    - **read:users**: read users info
-    - **write:users**: modify or remove users
 ### api_key
 
 - **Type**: API key
 - **API key parameter name**: api_key
 - **Location**: HTTP header
 
-### basic_auth
-
-- **Type**: HTTP basic authentication

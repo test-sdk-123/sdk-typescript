@@ -42,9 +42,6 @@ export class EchoApi extends runtime.BaseAPI {
 
         headerParameters['Content-Type'] = 'application/json';
 
-        if (this.configuration && (this.configuration.username !== undefined || this.configuration.password !== undefined)) {
-            headerParameters["Authorization"] = "Basic " + btoa(this.configuration.username + ":" + this.configuration.password);
-        }
         if (this.configuration && this.configuration.apiKey) {
             headerParameters["api_key"] = await this.configuration.apiKey("api_key"); // api_key authentication
         }
