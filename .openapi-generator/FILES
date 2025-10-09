@@ -5,8 +5,6 @@ README.md
 package.json
 src/apis/echoApi.ts
 src/apis/index.ts
-src/apis/tagApi.ts
-src/apis/userApi.ts
 src/index.ts
 src/models/index.ts
 src/models/problem.ts
