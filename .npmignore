@@ -1,8 +1,1 @@
-# Exclude all files by default
-*
-
-# Include only the files we want to publish
-!package.json
-!dist/
-!README.md
-!dist/**
+README.md
