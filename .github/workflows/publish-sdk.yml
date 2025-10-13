@@ -9,6 +9,9 @@ on:
 env:
   NPM_ORGANIZATION: "@test-sdk-123"
 
+permissions:
+  contents: write
+
 jobs:
   publish-npm:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
